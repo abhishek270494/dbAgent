@@ -45,7 +45,7 @@ public class DataSourceManager {
             case "mysql":
                 return "jdbc:mysql://" + config.getHost() + ":" + config.getPort() + "/" + config.getDatabaseName();
             case "oracle":
-                return "jdbc:oracle:thin:@" + config.getHost() + ":" + config.getPort() + ":" + config.getDatabaseName();
+                return "jdbc:oracle:thin:@" + config.getHost() + ":" + config.getPort() + "/" + config.getDatabaseName();
             default:
                 throw new RuntimeException("Unsupported DB");
         }
