@@ -1,0 +1,18 @@
+services:
+
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      POSTGRES_DB: agentdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+
+#  app:
+#    build: .
+#    depends_on:
+#      - postgres
+#    ports:
+#      - "8080:8080"

@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: dbAgent
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/agentdb
+    username: postgres
+    password: postgres
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+app:
+  datasource:
+    pool-size: 5
+
+server:
+  port: 8080
