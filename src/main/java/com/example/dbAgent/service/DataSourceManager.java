@@ -1,5 +1,8 @@
 package com.example.dbAgent.service;
 
+import static com.example.dbAgent.service.ConnectionService.buildJdbcUrl;
+
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -38,16 +41,38 @@ public class DataSourceManager {
         return dataSourceMap.get(id);
     }
 
-    private String buildJdbcUrl(DbConfigEntity config) {
-        switch (config.getType()) {
-            case "postgres":
-                return "jdbc:postgresql://" + config.getHost() + ":" + config.getPort() + "/" + config.getDatabaseName();
-            case "mysql":
-                return "jdbc:mysql://" + config.getHost() + ":" + config.getPort() + "/" + config.getDatabaseName();
-            case "oracle":
-                return "jdbc:oracle:thin:@" + config.getHost() + ":" + config.getPort() + "/" + config.getDatabaseName();
-            default:
-                throw new RuntimeException("Unsupported DB");
+    public Map<String, Map<String, Object>> getAllPoolStats() {
+        Map<String, Map<String, Object>> stats = new HashMap<>();
+
+        dataSourceMap.forEach((key, ds) -> {
+            if (ds instanceof HikariDataSource hikari) {
+
+                var mxBean = hikari.getHikariPoolMXBean();
+
+                Map<String, Object> poolStats = new HashMap<>();
+                poolStats.put("activeConnections", mxBean.getActiveConnections());
+                poolStats.put("idleConnections", mxBean.getIdleConnections());
+                poolStats.put("totalConnections", mxBean.getTotalConnections());
+                poolStats.put("threadsAwaitingConnection", mxBean.getThreadsAwaitingConnection());
+
+                stats.put(key, poolStats);
+            }
+        });
+
+        return stats;
+    }
+
+    public void remove(String dbId) {
+        DataSource ds = dataSourceMap.remove(dbId);
+
+        if (ds == null) {
+            throw new RuntimeException("No datasource found for id: " + dbId);
+        }
+
+        if (ds instanceof HikariDataSource hikari) {
+            hikari.close(); // 🔥 VERY IMPORTANT
+            System.out.println("Pool closed for: " + dbId);
         }
     }
+
 }
